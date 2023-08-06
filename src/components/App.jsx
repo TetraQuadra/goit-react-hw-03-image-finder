@@ -24,7 +24,7 @@ export class App extends Component {
       showLoader: true,
     });
     const response = await getData(text);
-
+    console.log(response)
     if (response?.totalHits) {
       this.setState({
         images: response.hits,

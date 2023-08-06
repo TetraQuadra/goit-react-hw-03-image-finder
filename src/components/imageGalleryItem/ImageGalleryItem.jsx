@@ -6,7 +6,7 @@ class ImageGalleryItem extends Component {
 
         return (
             <li onClick={callback} className="ImageGalleryItem" key={index}>
-                <img className="ImageGalleryItem-image" src={image.webformatURL} alt={`Image ${index}`} />
+                <img className="ImageGalleryItem-image" src={image.webformatURL} alt={image.tags} />
             </li>
         );
     }
