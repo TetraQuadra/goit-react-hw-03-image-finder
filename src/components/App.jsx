@@ -3,7 +3,7 @@ import getData from "services/getData";
 import Button from "./button/Button";
 import ImageGallery from "./imageGallery/ImageGallery";
 import Loader from "./loader/Loader";
-import { Modal } from "./modal/Modal";
+import Modal from "./modal/Modal";
 import Searchbar from "./searchbar/Searchbar";
 
 export class App extends Component {
@@ -24,7 +24,6 @@ export class App extends Component {
       showLoader: true,
     });
     const response = await getData(text);
-    console.log(response)
     if (response?.totalHits) {
       this.setState({
         images: response.hits,
