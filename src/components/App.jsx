@@ -17,73 +17,117 @@ export class App extends Component {
   };
 
   searchSubmit = async (text) => {
-
+    if (text === this.state.searchBar) {
+      return
+    }
     this.setState({
       searchBar: text,
       images: [],
-      showLoader: true,
+      currentPage: 1,
     });
-    const response = await getData(text);
-    if (response?.totalHits) {
-      this.setState({
-        images: response.hits,
-        showLoader: false,
-        currentPage: 1,
-        totalHits: response?.totalHits,
-      });
-    }
   };
 
-  loadMore = async () => {
-
-    const response = await getData(
-      this.state.searchBar,
-      this.state.currentPage + 1
-    );
-
-    if (response?.totalHits) {
-      this.setState((prevState) => ({
-        images: [...prevState.images, ...response.hits],
-        currentPage: prevState.currentPage + 1,
-      }));
-    }
-
+  loadMore = () => {
+    this.setState((prevState) => ({
+      currentPage: prevState.currentPage + 1,
+    }));
   };
 
   handleImageClick = (largeImageURL) => {
     this.setState({ selectedImage: largeImageURL });
+    window.addEventListener("keydown", this.handleEsc);
   };
 
   handleCloseModal = () => {
     this.setState({ selectedImage: null });
+    window.removeEventListener("keydown", this.handleEsc);
   };
+
+  handleEsc = (event) => {
+    if (event.keyCode === 27) {
+      this.handleCloseModal();
+    }
+  };
+
+  loadImages = () => {
+    this.setState({ showLoader: true });
+    const imageElements = document.querySelectorAll("img");
+    let imagesLoaded = 0;
+    const handleImageLoad = () => {
+      imagesLoaded++;
+      if (imagesLoaded === imageElements.length) {
+        this.setState({ showLoader: false });
+      }
+    };
+
+    imageElements.forEach((img) => {
+      if (img.complete) {
+        handleImageLoad();
+      } else {
+        img.addEventListener("load", handleImageLoad);
+      }
+    });
+  };
+
+  handleSearch = async () => {
+    const response = await getData(this.state.searchBar);
+    if (response?.totalHits) {
+      this.setState(
+        {
+          images: response.hits,
+          totalHits: response.totalHits,
+        },
+        () => {
+          this.loadImages();
+        }
+      );
+    }
+  };
+
+  handleLoadMoreImages = async () => {
+    const response = await getData(
+      this.state.searchBar,
+      this.state.currentPage
+    );
+    if (response?.totalHits) {
+      this.setState(
+        (prevState) => ({
+          images: [...prevState.images, ...response.hits],
+        }),
+        () => {
+          this.loadImages();
+        }
+      );
+    }
+  }
 
   componentDidMount() {
     this.searchSubmit("car");
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.searchBar !== prevState.searchBar) {
+      this.handleSearch();
+    }
+    if (this.state.currentPage !== prevState.currentPage && this.state.currentPage != 1) {
+      this.handleLoadMoreImages();
+    }
+  }
+
   render() {
     const { images, showLoader, totalHits, selectedImage } = this.state;
-
     return (
       <div className="App">
         <header>
           <Searchbar onSearchSubmit={this.searchSubmit} />
         </header>
-
         <main>
-          {showLoader ? (
-            <Loader />
-          ) : (
-            <>
-              <ImageGallery images={images} handleImageClick={this.handleImageClick} />
-              {images.length < totalHits && <Button loadMore={this.loadMore} />}
-            </>
-          )}
-
-
+          {showLoader && <Loader />}
+          <>
+            <ImageGallery images={images} handleImageClick={this.handleImageClick} />
+            {images.length < totalHits && !showLoader && <Button loadMore={this.loadMore} />}
+          </>
         </main>
-
         {selectedImage && (
           <Modal
             imageUrl={selectedImage}
@@ -92,7 +136,6 @@ export class App extends Component {
           />
         )}
       </div>
-
     );
   }
 }
