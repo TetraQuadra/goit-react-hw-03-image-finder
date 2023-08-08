@@ -109,7 +109,7 @@ export class App extends Component {
     if (this.state.searchBar !== prevState.searchBar) {
       this.handleSearch();
     }
-    if (this.state.currentPage !== prevState.currentPage && this.state.currentPage != 1) {
+    if (this.state.currentPage !== prevState.currentPage && this.state.currentPage !== 1) {
       this.handleLoadMoreImages();
     }
   }
