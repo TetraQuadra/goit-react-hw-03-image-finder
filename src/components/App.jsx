@@ -72,7 +72,7 @@ export class App extends Component {
   handleSearch = async () => {
     this.setState({ showLoader: true });
     const response = await getData(this.state.searchBar);
-    if (response?.totalHits) {
+    if (response?.totalHits > 0) {
       this.setState(
         {
           images: response.hits,
@@ -82,6 +82,10 @@ export class App extends Component {
           this.loadImages();
         }
       );
+    }
+    else {
+      alert('nothing found')
+      this.setState({ showLoader: false });
     }
   };
 
@@ -126,7 +130,7 @@ export class App extends Component {
           {showLoader && <Loader />}
           <>
             <ImageGallery images={images} handleImageClick={this.handleImageClick} />
-            {images.length < totalHits && !showLoader && <Button loadMore={this.loadMore} />}
+            {images.length < totalHits && !showLoader && images.length > 0 && <Button loadMore={this.loadMore} />}
           </>
         </main>
         {selectedImage && (
