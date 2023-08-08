@@ -70,6 +70,7 @@ export class App extends Component {
   };
 
   handleSearch = async () => {
+    this.setState({ showLoader: true });
     const response = await getData(this.state.searchBar);
     if (response?.totalHits) {
       this.setState(
